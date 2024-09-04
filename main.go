@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/mail"
 	"strings"
-	"time"
 
 	"golang.org/x/net/html/charset"
 	"github.com/alash3al/go-smtpsrv"
@@ -110,17 +109,37 @@ func decodeCharset(htmlBody, textBody string) (string, string) {
 
 	// Handle HTML body charset conversion if needed
 	htmlCharset := "utf-8" // Default to UTF-8; adjust if needed
-	if decodedBody, err := charset.NewReader(strings.NewReader(htmlBody), htmlCharset); err == nil {
-		htmlBytes, _ := ioutil.ReadAll(decodedBody)
-		htmlBodyDecoded = string(htmlBytes)
+	decodedHTMLBody, err := decodeCharsetFromString(htmlBody, htmlCharset)
+	if err == nil {
+		htmlBodyDecoded = decodedHTMLBody
 	}
 
 	// Handle Text body charset conversion if needed
 	textCharset := "utf-8" // Default to UTF-8; adjust if needed
-	if decodedBody, err := charset.NewReader(strings.NewReader(textBody), textCharset); err == nil {
-		textBytes, _ := ioutil.ReadAll(decodedBody)
-		textBodyDecoded = string(textBytes)
+	decodedTextBody, err := decodeCharsetFromString(textBody, textCharset)
+	if err == nil {
+		textBodyDecoded = decodedTextBody
 	}
 
 	return htmlBodyDecoded, textBodyDecoded
+}
+
+// decodeCharsetFromString decodes a string from a given charset
+func decodeCharsetFromString(body, charset string) (string, error) {
+	decodedBody := body
+
+	// Create a reader that decodes the charset
+	reader, err := charset.NewReader(strings.NewReader(body), charset)
+	if err != nil {
+		return "", err
+	}
+
+	// Read all content from the reader
+	bytes, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+
+	decodedBody = string(bytes)
+	return decodedBody, nil
 }
