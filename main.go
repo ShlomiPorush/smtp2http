@@ -187,7 +187,7 @@ func convertToUTF8(data []byte, charsetName string) (string, error) {
 func getEncodingByName(name string) (encoding.Encoding, string) {
 	switch strings.ToLower(name) {
 	case "windows-1255":
-		return encoding.Windows1255, "windows-1255"
+		return charset.Charset("windows-1255"), "windows-1255"
 	// Add more encodings as needed
 	default:
 		return charset.UTF8, "utf-8"
